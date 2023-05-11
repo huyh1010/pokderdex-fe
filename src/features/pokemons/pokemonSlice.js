@@ -4,10 +4,10 @@ import { POKEMONS_PER_PAGE } from "../../app/config";
 
 export const getPokemons = createAsyncThunk(
   "pokemons/getPokemons",
-  async ({ page, search, type }, { rejectWithValue }) => {
+  async ({ page, name, type }, { rejectWithValue }) => {
     try {
       let url = `/pokemons?page=${page}&limit=${POKEMONS_PER_PAGE}`;
-      if (search) url += `&search=${search}`;
+      if (name) url += `&name=${name}`;
       if (type) url += `&type=${type}`;
       const response = await apiService.get(url);
       const timeout = () => {
@@ -18,6 +18,7 @@ export const getPokemons = createAsyncThunk(
         });
       };
       await timeout();
+
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -89,7 +90,7 @@ export const pokemonSlice = createSlice({
       nextPokemon: null,
       previousPokemon: null,
     },
-    search: "",
+    name: "",
     type: "",
     page: 1,
   },
@@ -105,7 +106,7 @@ export const pokemonSlice = createSlice({
       state.type = action.payload;
     },
     searchQuery: (state, action) => {
-      state.search = action.payload;
+      state.name = action.payload;
     },
   },
   extraReducers: {
@@ -132,8 +133,8 @@ export const pokemonSlice = createSlice({
     },
     [getPokemons.fulfilled]: (state, action) => {
       state.loading = false;
-      const { search, type } = state;
-      if ((search || type) && state.page === 1) {
+      const { name, type } = state;
+      if ((name || type) && state.page === 1) {
         state.pokemons = action.payload;
       } else {
         state.pokemons = [...state.pokemons, ...action.payload];
